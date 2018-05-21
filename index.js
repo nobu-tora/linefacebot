@@ -58,12 +58,13 @@ function post_cognitive_url(context, event) {
   var body_string = null;
 
   var post_req = https.request(post_options, (res) => {
-    // context.log('Request Done!!' + post_data);
-    // context.log('STATUS: ' + res.statusCode);
-    // context.log('HEADERS: ' + JSON.stringify(res.headers));
+    context.log('Request Done!!' + post_data);
+    //context.log(res);
+    context.log('STATUS: ' + res.statusCode);
+    context.log('HEADERS: ' + JSON.stringify(res.headers));
     res.setEncoding('utf8');
     res.on('data', (chunk) => {
-      // context.log('BODY: ' + chunk);
+      context.log('BODY: ' + chunk);
       body_string = chunk;
     });
     res.on('end', function(){
@@ -86,8 +87,9 @@ function post_cognitive_url(context, event) {
  * @param {*} postData 
  */
 function postCognitiveImage(context, event, postData) {
-  context.log('postCognitiveImage Done!!' + postData.byteLength);
-  //var post_data = data;
+  //var postData1 = Buffer.concat(postData);
+  context.log(postData);
+  context.log(postData.byteLength);
   var parse_url = url.parse("https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile");
   var post_options = {
       host: parse_url.host,
@@ -95,7 +97,7 @@ function postCognitiveImage(context, event, postData) {
       method: 'POST',
       headers: {
           'Content-Type': 'application/octet-stream',
-          "Content-Length": postData.byteLength,
+          'Content-Length': postData.byteLength,
           'Ocp-Apim-Subscription-Key': process.env.COGNITIVE_KEY
       }
   };
@@ -104,20 +106,21 @@ function postCognitiveImage(context, event, postData) {
 
   var post_req = https.request(post_options, function(res){
      context.log('Request Done!!');
+     //context.log(res);
+     context.log(post_options);
      context.log('STATUS: ' + res.statusCode);
-     context.log('HEADERS: ' + JSON.stringify(res.headers));
     res.on('data', function(chunk) {
-      // context.log('BODY: ' + chunk);
+      context.log('BODY: ' + chunk);
       body_string = chunk;
     }).on('end', function(){
       if (res.statusCode != 200) {
           console.log('解析に失敗したわ。\nほんとに画像か、それ？');
       }
-      var result = JSON.parse(body_string);
+      //var result = JSON.parse(body_string);
       //context.log(body_string);
       context.log('result => ' + body_string);
-      var base64 = body_string.toString('utf-8'); 
-    　post_line_message(context, event, base64);
+      var result = body_string.toString('utf-8'); 
+    　post_line_message(context, event, result);
     });
   });
   post_req.write(postData);
@@ -179,19 +182,21 @@ function getImageData(context, event){
           'Authorization': 'Bearer {' + process.env.LINE_CHANNEL_ACCESS_TOKEN + '}'
       }
   };
+
+  var body_string = null;
   var req = https.request(post_options, function(res){
       context.log('start');
       var data = [];
     res.on('data', function(chunk){
         //image data dividing it in to multiple request
-        data.push(chunk);
+        data.push(new Buffer(chunk));
     }).on('error', function(err){
         context.log(err);
-        postLineMessage(context, event, err);
+        post_line_message(context, event, err);
     }).on('end', function(){
         var postData = Buffer.concat(data);
         context.log(data);
-        context.log(postData);
+        //context.log(postData);
         postCognitiveImage(context, event, postData);
     });
     });
