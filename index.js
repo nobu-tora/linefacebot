@@ -19,31 +19,19 @@ module.exports = function (context, myQueueItem) {
  */
 function post_message(context, event) {
   var messageType = event.message.type;
-  // context.log(messageType);
+  context.log(messageType);
   if (messageType == 'text') {
     post_cognitive_url(context, event);
   } else if (messageType == 'image') {
-    context.log('メッセージID' + message_id);
-    post_line_message(context, event, message_id);
-    get_message_content(context, event);
+    getImageData(context, event);
+    //context.log('メッセージID' + event.message.id);
+    //post_line_message(context, event, event.message.id);
   } else if (messageType == 'sticker') {
     post_line_message(context, event, 'いや・・このスタンプいいと思う。\n（画像のurlくれ)');
   } else {
     post_line_message(context, event, 'これなんですか？私分かりません');
   }
 }
-
-/* Face API config */
-var parse_url = url.parse("https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile");
-var post_options = {
-    host: parse_url.host,
-    path: parse_url.path,
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'Ocp-Apim-Subscription-Key': process.env.COGNITIVE_KEY
-    }
-};
 
 /**
  *  Send URL to Face API
@@ -54,6 +42,18 @@ function post_cognitive_url(context, event) {
   var post_data = JSON.stringify({
     "url": event.message.text
   });
+
+    /* Face API config */
+  var parse_url = url.parse("https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile");
+  var post_options = {
+      host: parse_url.host,
+      path: parse_url.path,
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'Ocp-Apim-Subscription-Key': process.env.COGNITIVE_KEY
+      }
+  };
 
   var body_string = null;
 
@@ -80,11 +80,49 @@ function post_cognitive_url(context, event) {
 }
 
 /**
- * Send image data to Face API
+ *  Send image data to Face API
  * @param {*} context 
  * @param {*} event 
+ * @param {*} postData 
  */
-function post_cognitive_image(context, event) {
+function postCognitiveImage(context, event, postData) {
+  context.log('postCognitiveImage Done!!' + postData.byteLength);
+  //var post_data = data;
+  var parse_url = url.parse("https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile");
+  var post_options = {
+      host: parse_url.host,
+      path: parse_url.path,
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/octet-stream',
+          "Content-Length": postData.byteLength,
+          'Ocp-Apim-Subscription-Key': process.env.COGNITIVE_KEY
+      }
+  };
+
+  var body_string = null;
+
+  var post_req = https.request(post_options, function(res){
+     context.log('Request Done!!');
+     context.log('STATUS: ' + res.statusCode);
+     context.log('HEADERS: ' + JSON.stringify(res.headers));
+    res.on('data', function(chunk) {
+      // context.log('BODY: ' + chunk);
+      body_string = chunk;
+    }).on('end', function(){
+      if (res.statusCode != 200) {
+          console.log('解析に失敗したわ。\nほんとに画像か、それ？');
+      }
+      var result = JSON.parse(body_string);
+      //context.log(body_string);
+      context.log('result => ' + body_string);
+      var base64 = body_string.toString('utf-8'); 
+    　post_line_message(context, event, base64);
+    });
+  });
+  post_req.write(postData);
+  post_req.end();
+  context.log('Post Cognitive !');
 }
 
 /**
@@ -128,34 +166,35 @@ function post_line_message(context, event, msg) {
  * @param {*} context 
  * @param {*} event 
  */
-function get_message_content(context, event){
-  var message_id = event.message.id;
-  context.log('メッセージID' + message_id);
-  var parse_url = url.parse('https://api.line.me/v2/bot/message/' + message_id + '/content');
+function getImageData(context, event){
+  var messageId = event.message.id;
+  context.log('メッセージID' + messageId);
+  var parse_url = url.parse('https://api.line.me/v2/bot/message/7977289829836/content');
   var post_options = {
-    host: parse_url.host,
-    path: parse_url.path,
-    method: 'GET',
+  host: parse_url.host,
+  path: parse_url.path,
+  method: 'GET',
       headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer {' + LINE_CHANNEL_ACCESS_TOKEN + '}'
+          "Content-type": "application/json; charset=UTF-8",
+          'Authorization': 'Bearer {' + process.env.LINE_CHANNEL_ACCESS_TOKEN + '}'
       }
   };
-// APIリクエスト
-var req = https.request(post_options, function(res){
-  var data = [];
-  res.on('data', function(chunk){
-      //image data dividing it in to multiple request
-      data.push(new Buffer(chunk));
-  }).on('error', function(err){
-      context.log(err);
-      post_line_message(context, event, err);
-  }).on('end', function(){
-      body_string = data;
-      context.log('body_string => ' + body_string);
-      //callback(data);
-      post_line_message(context, event, `取得できた`);
-  });
-  });
-  req.end();
+  var req = https.request(post_options, function(res){
+      context.log('start');
+      var data = [];
+    res.on('data', function(chunk){
+        //image data dividing it in to multiple request
+        data.push(chunk);
+    }).on('error', function(err){
+        context.log(err);
+        postLineMessage(context, event, err);
+    }).on('end', function(){
+        var postData = Buffer.concat(data);
+        context.log(data);
+        context.log(postData);
+        postCognitiveImage(context, event, postData);
+    });
+    });
+    req.end();
+    context.log('GetImage Cognitive !');
 }
