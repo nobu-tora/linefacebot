@@ -8,7 +8,7 @@ var url = require('url');
  */
 module.exports = function(context, myQueueItem) {
   context.log('JavaScript queue trigger function processed work item', myQueueItem);
-  myQueueItem.events.forEach(event => postMessage(context, event));
+  myQueueItem.events.forEach((event) => postMessage(context, event));
   context.done();
 };
 
