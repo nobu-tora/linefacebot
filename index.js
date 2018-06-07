@@ -1,13 +1,15 @@
 var https = require('https');
 var url = require('url');
 
+var FACE_API = 'https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile';
+
 /**
  * JavaScript queue trigger function processed work item
  * @param {*} context
  * @param {*} myQueueItem
  */
 module.exports = function(context, myQueueItem) {
-  context.log('JavaScript queue trigger function processed work item', myQueueItem);
+  context.log(myQueueItem);
   myQueueItem.events.forEach((event) => postMessage(context, event));
   context.done();
 };
@@ -21,19 +23,21 @@ function postMessage(context, event) {
   var messageType = event.message.type;
   context.log(messageType);
   if (messageType === 'text') {
-    postCognitiveUrl(context, event);
+    postLineMessage(context, event, '画像をおくってね♡');
+    // postCognitiveUrl(context, event);
   } else if (messageType === 'image') {
     getImageData(context, event)
     .then((postData) =>{
         postCognitiveImage(context, event, postData);
     })
-    .catch((err) => fail(err, callback));
-    // context.log('メッセージID' + event.message.id);
-    // postLineMessage(context, event, event.message.id);
+    .catch((err) => {
+      context.log(err);
+      postCognitiveImage(context, event, err);
+    });
   } else if (messageType === 'sticker') {
-    postLineMessage(context, event, 'いや・・このスタンプいいと思う。\n（画像のurlくれ)');
+    postLineMessage(context, event, 'このスタンプいいと思うよ！！（画像くれ)');
   } else {
-    postLineMessage(context, event, 'これなんですか？私分かりません');
+    postLineMessage(context, event, '私分かりません（画像くれ)');
   }
 }
 
@@ -41,14 +45,11 @@ function postMessage(context, event) {
  *  Send URL to Face API
  * @param {*} context
  * @param {*} event
- */
 function postCognitiveUrl(context, event) {
   var postData = JSON.stringify({
     'url': event.message.text,
   });
-
-    /* Face API config */
-  var parseUrl = url.parse('https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile');
+  var parseUrl = url.parse(FACE_API);
   var postOptions = {
       host: parseUrl.host,
       path: parseUrl.path,
@@ -74,7 +75,7 @@ function postCognitiveUrl(context, event) {
     });
     res.on('end', function() {
       if (res.statusCode !== 200) {
-        bodyString = '解析に失敗したわ。\nほんとに画像のURLか、それ？';
+        bodyString = '私わかりません(画像くれ)';
       }
       // context.log('bodyString => ' + bodyString);
       postLineMessage(context, event, bodyString);
@@ -84,6 +85,7 @@ function postCognitiveUrl(context, event) {
   req.end();
   context.log('Post Cognitive !');
 }
+*/
 
 /**
  *  Send image data to Face API
@@ -92,10 +94,7 @@ function postCognitiveUrl(context, event) {
  * @param {*} postData
  */
 function postCognitiveImage(context, event, postData) {
-  // var postData1 = Buffer.concat(postData);
-  context.log(postData);
-  context.log(postData.length);
-  var parseUrl = url.parse('https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile');
+  var parseUrl = url.parse(FACE_API);
   var postOptions = {
       host: parseUrl.host,
       path: parseUrl.path,
@@ -110,29 +109,23 @@ function postCognitiveImage(context, event, postData) {
   var bodyString = null;
 
   var req = https.request(postOptions, function(res) {
-     context.log('Request Done!!');
-     // context.log(res);
-     context.log(postOptions);
      context.log('STATUS: ' + res.statusCode);
     res.setEncoding('utf8');
-    context.log(res);
     res.on('data', function(chunk) {
-      context.log('BODY: ' + chunk);
       bodyString = chunk;
     }).on('end', function() {
-      if (res.statusCode !== 200) {
-          console.log('解析に失敗したわ。\nほんとに画像か、それ？');
+      if (res.statusCode !== 200 || bodyString === '[]') {
+        postLineMessage(context, event, 'ほんとに顔写ってる画像？');
+      } else {
+        var result = JSON.parse(bodyString);
+        context.log(result[0]);
+        var age = result[0].faceAttributes.age;
+        postLineMessage(context, event, 'あなたの、、顔\n' + age + '歳かな？');
       }
-      // var result = JSON.parse(bodyString);
-      // context.log(bodyString);
-      context.log('result => ' + bodyString);
-      var result = bodyString.toString('utf-8');
-      postLineMessage(context, event, result);
     });
   });
   req.write(postData);
   req.end();
-  context.log('Post Cognitive !');
 }
 
 /**
@@ -152,7 +145,6 @@ function postLineMessage(context, event, msg) {
     'messages': [jObj],
   });
 
-  context.log('LINE Post Data =>' + postData);
   var parseUrl = url.parse('https://api.line.me/v2/bot/message/reply');
   var postOptions = {
     host: parseUrl.host,
@@ -179,23 +171,20 @@ function postLineMessage(context, event, msg) {
 function getImageData(context, event) {
     return new Promise((resolve, reject) => {
         var messageId = event.message.id;
-        context.log('メッセージID' + messageId);
-        var parseUrl = url.parse('https://api.line.me/v2/bot/message/7977289829836/content');
+        context.log('メッセージID：' + messageId);
+        var parseUrl = url.parse('https://api.line.me/v2/bot/message/' + messageId + '/content');
         var postOptions = {
         host: parseUrl.host,
         path: parseUrl.path,
         method: 'GET',
             headers: {
-                'Content-type': 'application/json; charset=UTF-8',
+                'Content-type': 'application/json',
                 'Authorization': 'Bearer {' + process.env.LINE_CHANNEL_ACCESS_TOKEN + '}',
             },
         };
-        // var bodyString = null;
         var req = https.request(postOptions, function(res) {
-            context.log('start');
             var data = [];
             res.on('data', function(chunk) {
-                // image data dividing it in to multiple request
                 data.push(new Buffer(chunk));
             }).on('error', function(err) {
                 context.log(err);
@@ -203,12 +192,9 @@ function getImageData(context, event) {
                 reject(err);
             }).on('end', function() {
                 var postData = Buffer.concat(data);
-                context.log(data);
-                // context.log(postData);
                 resolve(postData);
             });
             });
         req.end();
-        context.log('GetImage Cognitive !');
     });
 }
