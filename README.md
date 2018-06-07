@@ -2,4 +2,4 @@
 
 こんな感じ
 
-![](faceBot-test.jpg)
+![](faceBot-test.jpg "width=300px")
