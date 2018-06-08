@@ -1,7 +1,7 @@
-var https = require('https');
-var url = require('url');
+const https = require('https');
+const url = require('url');
 
-var FACE_API = 'https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile';
+const FACE_API = 'https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile';
 
 /**
  * JavaScript queue trigger function processed work item
@@ -20,6 +20,7 @@ module.exports = function(context, myQueueItem) {
  * @param {*} event
  */
 function postMessage(context, event) {
+  // checkToken(context, event)
   var messageType = event.message.type;
   context.log(messageType);
   if (messageType === 'text') {
@@ -120,7 +121,16 @@ function postCognitiveImage(context, event, postData) {
         var result = JSON.parse(bodyString);
         context.log(result[0]);
         var age = result[0].faceAttributes.age;
-        postLineMessage(context, event, 'あなたの、、顔\n' + age + '歳かな？');
+        var gender = '不明';
+        
+        if (result[0].faceAttributes.gender === 'male') {
+            gender = '男性';
+        } else if(result[0].faceAttributes.gender === 'female') {
+            gender = '女性';
+        } else {
+            gender = '人間';
+        }
+        postLineMessage(context, event, 'う～ん、、、\n' + age + '歳の' + gender + 'かな？');
       }
     });
   });
