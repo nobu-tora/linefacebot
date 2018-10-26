@@ -1,5 +1,6 @@
 const https = require('https');
 const url = require('url');
+const Client = require('@line/bot-sdk').Client;
 
 /* message */
 const MSG_400_1 = '画像をおくってね。顔年齢を診断できるよ！';
@@ -17,8 +18,14 @@ const ENUM_GENDER = {
 const FACE_API = 'https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile';
 const LINE_REPLY = 'https://api.line.me/v2/bot/message/reply';
 
+const client = new Client({
+  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+  channelSecret: LINE_CHANNEL_SECRET,
+});
+
 /**
- * JavaScript queue trigger function processed work item
+ * JavaScript queue trigger function processed work item.
+ *
  * @param {*} context
  * @param {*} myQueueItem
  */
@@ -29,12 +36,14 @@ module.exports = function(context, myQueueItem) {
 };
 
 /**
- * Determining the message type
+ * Determining the message type.
+ *
  * @param {*} context
  * @param {*} event
  */
 function postMessage(context, event) {
-  // checkToken(context, event)
+  // line.middleware(config)
+  
   var messageType = event.message.type;
   context.log(messageType);
   if (messageType === 'text') {
@@ -61,10 +70,10 @@ function postMessage(context, event) {
  * @param {*} event
  */
 function JudgmentTextMessage(context, event) {
-  context.log(event.message.text);
   if(event.message.text.indexOf('天気') > -1){
-    postLineMessage(context, event, event.message.text);
+    postLineMessage(context, event, '天気予報実装予定だよ');
   } else {
+    client.pushMessage(userId, { type: 'text', text: 'hello, world' });
     postLineMessage(context, event, MSG_400_1);
   };
 }
