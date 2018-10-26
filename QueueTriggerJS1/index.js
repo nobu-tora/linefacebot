@@ -57,8 +57,10 @@ function postMessage(context, event) {
         postCognitiveImage(context, event, postData);
     })
     .catch((err) => {
-      context.log(err);
-      postCognitiveImage(context, event, err);
+      client.replyMessage(event.replyToken, {
+        type: MESSAGE_TYPE.text,
+        text: err.message,
+      });
     });
   } else if (messageType === MESSAGE_TYPE.sticker) {
     client.replyMessage(event.replyToken, {
@@ -154,8 +156,20 @@ function postCognitiveImage(context, event, postData) {
 function getImageData(context, event) {
     return new Promise((resolve, reject) => {
         var messageId = event.message.id;
-        var data = client.getMessageContent(messageId) 
-        context.log(data);
-        resolve(data)
+        var data = [];
+        client.getMessageContent(messageId)      
+        .then((stream) => {
+          stream.on('data', (chunk) => {
+            data.push(new Buffer(chunk));
+          })
+          stream.on('error', (err) => {
+            context.log(err);
+            reject(err);
+          })
+          stream.on('end', () => {
+          var postData = Buffer.concat(data);
+          resolve(postData);
+          });
+        });
     });
 };
