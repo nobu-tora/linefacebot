@@ -55,10 +55,15 @@ function postMessage(context, event) {
   }
 };
 
-
+/**
+ * JudgmentTextMessage
+ * @param {*} context
+ * @param {*} event
+ */
 function JudgmentTextMessage(context, event) {
-  if(event.message.indexOf('天気') > -1){
-    postLineMessage(context, event, event.message);
+  context.log(event);
+  if(event.events[0].message.indexOf('天気') > -1){
+    postLineMessage(context, event, event.events[0].message);
   } else {
     postLineMessage(context, event, MSG_400_1);
   };
