@@ -14,9 +14,14 @@ const ENUM_GENDER = {
   female : '女',
 };
 
+const MESSAGE_TYPE = {
+  text : 'text',
+  image : 'image',
+  sticker : 'sticker',
+}
+
 /* url */
 const FACE_API = 'https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile';
-const LINE_REPLY = 'https://api.line.me/v2/bot/message/reply';
 
 const client = new Client({
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
@@ -42,13 +47,11 @@ module.exports = function(context, myQueueItem) {
  * @param {*} event
  */
 function postMessage(context, event) {
-  // line.middleware(config)
-  
   var messageType = event.message.type;
   context.log(messageType);
-  if (messageType === 'text') {
+  if (messageType === MESSAGE_TYPE.text) {
     JudgmentTextMessage(context, event);
-  } else if (messageType === 'image') {
+  } else if (messageType === MESSAGE_TYPE.image) {
     getImageData(context, event)
     .then((postData) =>{
         postCognitiveImage(context, event, postData);
@@ -57,10 +60,16 @@ function postMessage(context, event) {
       context.log(err);
       postCognitiveImage(context, event, err);
     });
-  } else if (messageType === 'sticker') {
-    postLineMessage(context, event, MSG_400_2);
+  } else if (messageType === MESSAGE_TYPE.sticker) {
+    client.replyMessage(event.replyToken, {
+      type: MESSAGE_TYPE.text,
+      text: MSG_400_2,
+    });
   } else {
-    postLineMessage(context, event, MSG_400_3);
+    client.replyMessage(event.replyToken, {
+      type: MESSAGE_TYPE.text,
+      text: MSG_400_3,
+    });
   }
 };
 
@@ -71,14 +80,15 @@ function postMessage(context, event) {
  */
 function JudgmentTextMessage(context, event) {
   if(event.message.text.indexOf('天気') > -1){
-    postLineMessage(context, event, '天気予報実装予定だよ');
+    client.replyMessage(event.replyToken, {
+      type: MESSAGE_TYPE.text,
+      text: '天気予報実装予定だよ',
+    });
   } else {
     client.replyMessage(event.replyToken, {
-      type: 'text',
-      text: 'hello, world',
+      type: MESSAGE_TYPE.text,
+      text: MSG_400_1,
     });
-
-    postLineMessage(context, event, MSG_400_1);
   };
 }
 
@@ -110,7 +120,10 @@ function postCognitiveImage(context, event, postData) {
       bodyString = chunk;
     }).on('end', function() {
       if (res.statusCode !== 200 || bodyString === '[]') {
-        postLineMessage(context, event, MSG_400_4);
+        client.replyMessage(event.replyToken, {
+          type: MESSAGE_TYPE.text,
+          text: MSG_400_4,
+        });
       } else {
         var result = JSON.parse(bodyString);
         context.log(result[0]);
@@ -122,48 +135,16 @@ function postCognitiveImage(context, event, postData) {
         } else if(result[0].faceAttributes.gender === 'female') {
             gender = ENUM_GENDER.female;
         };
-        postLineMessage(context, event, 'う～ん、、、\n' + age + '歳の' + gender + 'かな？');
+        client.replyMessage(event.replyToken, {
+          type: MESSAGE_TYPE.text,
+          text: 'う～ん、、、\n' + age + '歳の' + gender + 'かな？',
+        });
       }
     });
   });
   req.write(postData);
   req.end();
 }
-
-/**
- * Send message to LINE
- * @param {*} context
- * @param {*} event
- * @param {*} msg
- */
-function postLineMessage(context, event, msg) {
-  var jObj = {};
-  jObj.type = 'text';
-  jObj.id = event.message.id;
-  jObj.text = msg;
-
-  var postData = JSON.stringify({
-    'replyToken': event.replyToken,
-    'messages': [jObj],
-  });
-
-  var parseUrl = url.parse(LINE_REPLY);
-  var postOptions = {
-    host: parseUrl.host,
-    path: parseUrl.path,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer {' + process.env.LINE_CHANNEL_ACCESS_TOKEN + '}',
-      'Content-Length': Buffer.byteLength(postData),
-    },
-  };
-
-  var req = https.request(postOptions);
-  req.write(postData);
-  req.end();
-  context.log('Post LINE Message !');
-};
 
 /**
  * Retrieve image data from LINE
@@ -173,29 +154,8 @@ function postLineMessage(context, event, msg) {
 function getImageData(context, event) {
     return new Promise((resolve, reject) => {
         var messageId = event.message.id;
-        var parseUrl = url.parse('https://api.line.me/v2/bot/message/' + messageId + '/content');
-        var postOptions = {
-        host: parseUrl.host,
-        path: parseUrl.path,
-        method: 'GET',
-            headers: {
-                'Content-type': 'application/json',
-                'Authorization': 'Bearer {' + process.env.LINE_CHANNEL_ACCESS_TOKEN + '}',
-            },
-        };
-        var req = https.request(postOptions, function(res) {
-            var data = [];
-            res.on('data', function(chunk) {
-                data.push(new Buffer(chunk));
-            }).on('error', function(err) {
-                context.log(err);
-                postLineMessage(context, event, err);
-                reject(err);
-            }).on('end', function() {
-                var postData = Buffer.concat(data);
-                resolve(postData);
-            });
-            });
-        req.end();
+        var data = client.getMessageContent(messageId) 
+        context.log(data);
+        resolve(data)
     });
 };
