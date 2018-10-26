@@ -61,9 +61,9 @@ function postMessage(context, event) {
  * @param {*} event
  */
 function JudgmentTextMessage(context, event) {
-  context.log(event);
-  if(event.events[0].message.indexOf('天気') > -1){
-    postLineMessage(context, event, event.events[0].message);
+  context.log(event.message.text);
+  if(event.message.text.indexOf('天気') > -1){
+    postLineMessage(context, event, event.message.text);
   } else {
     postLineMessage(context, event, MSG_400_1);
   };
