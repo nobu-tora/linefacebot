@@ -20,7 +20,7 @@ const LINE_REPLY = 'https://api.line.me/v2/bot/message/reply';
 
 const client = new Client({
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-  channelSecret: LINE_CHANNEL_SECRET,
+  channelSecret: process.env.LINE_CHANNEL_SECRET,
 });
 
 /**
