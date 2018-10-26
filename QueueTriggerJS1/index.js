@@ -1,7 +1,21 @@
 const https = require('https');
 const url = require('url');
 
+/* message */
+const MSG_400_1 = '画像をおくってね。顔年齢を診断できるよ！';
+const MSG_400_2 = 'このスタンプいいと思うよ！！（画像くれ)';
+const MSG_400_3 = '私分かりません（画像くれ)';
+const MSG_400_4 = 'ほんとに顔写ってる画像？';
+
+/* ENUM */
+const ENUM_GENDER = {
+  male : '男',
+  female : '女',
+};
+
+/* url */
 const FACE_API = 'https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile';
+const LINE_REPLY = 'https://api.line.me/v2/bot/message/reply';
 
 /**
  * JavaScript queue trigger function processed work item
@@ -24,8 +38,7 @@ function postMessage(context, event) {
   var messageType = event.message.type;
   context.log(messageType);
   if (messageType === 'text') {
-    postLineMessage(context, event, '画像をおくってね♡');
-    // postCognitiveUrl(context, event);
+    postLineMessage(context, event, MSG_400_1);
   } else if (messageType === 'image') {
     getImageData(context, event)
     .then((postData) =>{
@@ -36,57 +49,11 @@ function postMessage(context, event) {
       postCognitiveImage(context, event, err);
     });
   } else if (messageType === 'sticker') {
-    postLineMessage(context, event, 'このスタンプいいと思うよ！！（画像くれ)');
+    postLineMessage(context, event, MSG_400_2);
   } else {
-    postLineMessage(context, event, '私分かりません（画像くれ)');
+    postLineMessage(context, event, MSG_400_3);
   }
-}
-
-/**
- *  Send URL to Face API
- * @param {*} context
- * @param {*} event
-function postCognitiveUrl(context, event) {
-  var postData = JSON.stringify({
-    'url': event.message.text,
-  });
-  var parseUrl = url.parse(FACE_API);
-  var postOptions = {
-      host: parseUrl.host,
-      path: parseUrl.path,
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'Ocp-Apim-Subscription-Key': process.env.COGNITIVE_KEY,
-      },
-  };
-
-  var bodyString = null;
-
-  var req = https.request(postOptions, (res) => {
-    context.log('Request Done!!' + postData);
-    // context.log(res);
-    context.log('STATUS: ' + res.statusCode);
-    context.log('HEADERS: ' + JSON.stringify(res.headers));
-    res.setEncoding('utf8');
-        context.log(res);
-    res.on('data', (chunk) => {
-      context.log('BODY: ' + chunk);
-      bodyString = chunk;
-    });
-    res.on('end', function() {
-      if (res.statusCode !== 200) {
-        bodyString = '私わかりません(画像くれ)';
-      }
-      // context.log('bodyString => ' + bodyString);
-      postLineMessage(context, event, bodyString);
-    });
-  });
-  req.write(postData);
-  req.end();
-  context.log('Post Cognitive !');
-}
-*/
+};
 
 /**
  *  Send image data to Face API
@@ -116,20 +83,18 @@ function postCognitiveImage(context, event, postData) {
       bodyString = chunk;
     }).on('end', function() {
       if (res.statusCode !== 200 || bodyString === '[]') {
-        postLineMessage(context, event, 'ほんとに顔写ってる画像？');
+        postLineMessage(context, event, MSG_400_4);
       } else {
         var result = JSON.parse(bodyString);
         context.log(result[0]);
         var age = result[0].faceAttributes.age;
-        var gender = '不明';
-        
+        var gender = '人間';
+
         if (result[0].faceAttributes.gender === 'male') {
-            gender = '男性';
+            gender = ENUM_GENDER.male;
         } else if(result[0].faceAttributes.gender === 'female') {
-            gender = '女性';
-        } else {
-            gender = '人間';
-        }
+            gender = ENUM_GENDER.female;
+        };
         postLineMessage(context, event, 'う～ん、、、\n' + age + '歳の' + gender + 'かな？');
       }
     });
@@ -155,7 +120,7 @@ function postLineMessage(context, event, msg) {
     'messages': [jObj],
   });
 
-  var parseUrl = url.parse('https://api.line.me/v2/bot/message/reply');
+  var parseUrl = url.parse(LINE_REPLY);
   var postOptions = {
     host: parseUrl.host,
     path: parseUrl.path,
@@ -171,7 +136,7 @@ function postLineMessage(context, event, msg) {
   req.write(postData);
   req.end();
   context.log('Post LINE Message !');
-}
+};
 
 /**
  * Retrieve image data from LINE
@@ -181,7 +146,6 @@ function postLineMessage(context, event, msg) {
 function getImageData(context, event) {
     return new Promise((resolve, reject) => {
         var messageId = event.message.id;
-        context.log('メッセージID：' + messageId);
         var parseUrl = url.parse('https://api.line.me/v2/bot/message/' + messageId + '/content');
         var postOptions = {
         host: parseUrl.host,
@@ -207,4 +171,4 @@ function getImageData(context, event) {
             });
         req.end();
     });
-}
+};
