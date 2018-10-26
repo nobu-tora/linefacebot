@@ -73,7 +73,11 @@ function JudgmentTextMessage(context, event) {
   if(event.message.text.indexOf('天気') > -1){
     postLineMessage(context, event, '天気予報実装予定だよ');
   } else {
-    client.pushMessage(userId, { type: 'text', text: 'hello, world' });
+    client.replyMessage(event.replyToken, {
+      type: 'text',
+      text: 'hello, world',
+    });
+
     postLineMessage(context, event, MSG_400_1);
   };
 }
