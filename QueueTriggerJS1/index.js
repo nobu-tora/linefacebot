@@ -38,7 +38,7 @@ function postMessage(context, event) {
   var messageType = event.message.type;
   context.log(messageType);
   if (messageType === 'text') {
-    postLineMessage(context, event, MSG_400_1);
+    JudgmentTextMessage(context, event);
   } else if (messageType === 'image') {
     getImageData(context, event)
     .then((postData) =>{
@@ -54,6 +54,15 @@ function postMessage(context, event) {
     postLineMessage(context, event, MSG_400_3);
   }
 };
+
+
+function JudgmentTextMessage(context, event) {
+  if(event.message.indexOf('天気') > -1){
+    postLineMessage(context, event, event.message);
+  } else {
+    postLineMessage(context, event, MSG_400_1);
+  };
+}
 
 /**
  *  Send image data to Face API
