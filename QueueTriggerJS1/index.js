@@ -49,47 +49,32 @@ module.exports = function(context, myQueueItem) {
  * @param {*} event
  */
 function postMessage(context, event) {
-  return new Promise((resolve, reject) => {
+  try {
     context.log(event);
-    try {
-      switch (event.message.type) {
-        case MESSAGE_TYPE.text:
-          context.log('case1');
-          judgmentTextMessage(context, event)
-            .then(() => resolve());
-            break;
-        case MESSAGE_TYPE.image:
-          context.log('case2');
-          getImageData(context, event)
-            .then((postData) => postCognitiveImage(context, event, postData))
-            .then(() => resolve());
-            break;
-        case MESSAGE_TYPE.sticker:
-          context.log('case3');
-          client.replyMessage(event.replyToken, {
-            type: MESSAGE_TYPE.text,
-            text: MSG_400_2,
-          })
-          .then(() => resolve());
-          break;
-        default:
-          context.log('case4');
-          client.replyMessage(event.replyToken, {
-            type: MESSAGE_TYPE.text,
-            text: MSG_400_3,
-          })
-          .then(() => resolve());
-          break;
-      };
-    } catch (err) {
-      context.log(err);
-      client.replyMessage(event.replyToken, {
+    const type = event.message.type;
+    if (type === MESSAGE_TYPE.text) {
+      return judgmentTextMessage(context, event);
+    } else if (type === MESSAGE_TYPE.image) {
+      return getImageData(context, event)
+          .then((postData) => postCognitiveImage(context, event, postData));
+    } else if (type === MESSAGE_TYPE.sticker) {
+      return client.replyMessage(event.replyToken, {
         type: MESSAGE_TYPE.text,
-        text: MSG_500,
-      })
-      .then(() => resolve());
-    };
-  });
+        text: MSG_400_2,
+      });
+    } else {
+      return client.replyMessage(event.replyToken, {
+        type: MESSAGE_TYPE.text,
+        text: MSG_400_3,
+      });
+    }
+  } catch (err) {
+    context.log(err);
+    return client.replyMessage(event.replyToken, {
+      type: MESSAGE_TYPE.text,
+      text: MSG_500,
+    });
+  };
 };
 
 /**
@@ -122,20 +107,20 @@ function getImageData(context, event) {
   return new Promise((resolve, reject) => {
     var data = [];
     client.getMessageContent(event.message.id)
-    .then((stream) => {
-      stream.on('data', (chunk) => {
-        data.push(new Buffer(chunk));
-      });
-      stream.on('error', (err) => {
-        context.log(err);
-        reject(err);
-      });
-      stream.on('end', () => {
-        context.log('get image');
-        resolve(Buffer.concat(data));
-      });
-    })
-    .catch((err) => reject(err));
+        .then((stream) => {
+          stream.on('data', (chunk) => {
+            data.push(new Buffer(chunk));
+          });
+          stream.on('error', (err) => {
+            context.log(err);
+            reject(err);
+          });
+          stream.on('end', () => {
+            context.log('get image');
+            resolve(Buffer.concat(data));
+          });
+        })
+        .catch((err) => reject(err));
   });
 };
 
@@ -149,14 +134,14 @@ function getImageData(context, event) {
 function postCognitiveImage(context, event, postData) {
   var parseUrl = url.parse(COGNITIVE_SERVICE + 'face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile');
   var postOptions = {
-      host: parseUrl.host,
-      path: parseUrl.path,
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/octet-stream',
-          'Content-Length': postData.length,
-          'Ocp-Apim-Subscription-Key': process.env.COGNITIVE_KEY,
-      },
+    host: parseUrl.host,
+    path: parseUrl.path,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      'Content-Length': postData.length,
+      'Ocp-Apim-Subscription-Key': process.env.COGNITIVE_KEY,
+    },
   };
 
   var bodyString = null;
@@ -178,9 +163,9 @@ function postCognitiveImage(context, event, postData) {
         var gender = '人間';
 
         if (result[0].faceAttributes.gender === 'male') {
-            gender = ENUM_GENDER.male;
+          gender = ENUM_GENDER.male;
         } else if (result[0].faceAttributes.gender === 'female') {
-            gender = ENUM_GENDER.female;
+          gender = ENUM_GENDER.female;
         };
         context.log('success post line');
         return client.replyMessage(event.replyToken, {
