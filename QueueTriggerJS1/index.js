@@ -1,4 +1,5 @@
 const https = require('https');
+var http = require('http');
 const url = require('url');
 const Client = require('@line/bot-sdk').Client;
 
@@ -53,17 +54,17 @@ function postMessage(context, event) {
     context.log(event);
     const type = event.message.type;
     if (type === MESSAGE_TYPE.text) {
-      return judgmentTextMessage(context, event);
+      judgmentTextMessage(context, event);
     } else if (type === MESSAGE_TYPE.image) {
-      return getImageData(context, event)
+      getImageData(context, event)
           .then((postData) => postCognitiveImage(context, event, postData));
     } else if (type === MESSAGE_TYPE.sticker) {
-      return client.replyMessage(event.replyToken, {
+      client.replyMessage(event.replyToken, {
         type: MESSAGE_TYPE.text,
         text: MSG_400_2,
       });
     } else {
-      return client.replyMessage(event.replyToken, {
+      client.replyMessage(event.replyToken, {
         type: MESSAGE_TYPE.text,
         text: MSG_400_3,
       });
@@ -85,16 +86,52 @@ function postMessage(context, event) {
  */
 function judgmentTextMessage(context, event) {
   if (event.message.text.indexOf('天気') > -1) {
-    return client.replyMessage(event.replyToken, {
-      type: MESSAGE_TYPE.text,
-      text: '天気予報実装予定だよ',
-    });
+    openWeatherMap(context, event)
+        .then((res) => {
+          context.log(res.weather[0]);
+          context.log(res.weather[0].main);
+          client.replyMessage(event.replyToken, {
+            type: MESSAGE_TYPE.text,
+            text: '東京の天気は、' + res.weather[0].main,
+          });
+        });
   } else {
     return client.replyMessage(event.replyToken, {
       type: MESSAGE_TYPE.text,
       text: MSG_400_1,
     });
   };
+};
+
+/**
+ * openWeatherMap
+ *
+ * @param {*} context
+ * @param {*} event
+ */
+function openWeatherMap(context, event) {
+  return new Promise((resolve, reject) => {
+    var location = 'Tokyo,jp';
+    var units = 'metric';
+    var APIKEY = process.env.OPEN_WEATHER_MAP_KEY;
+    var URL = 'http://api.openweathermap.org/data/2.5/weather?q='+ location +'&units='+ units +'&appid='+ APIKEY;
+
+    http.get(URL, function(res) {
+      var body = '';
+      res.setEncoding('utf8');
+      res.on('data', function(chunk) {
+        body += chunk;
+      });
+      res.on('data', function(chunk) {
+        res = JSON.parse(body);
+        context.log(res);
+        resolve(res);
+      });
+    }).on('error', function(e) {
+      context.log(e.message);
+      reject(e.message);
+    });
+  });
 };
 
 /**
