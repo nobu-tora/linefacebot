@@ -146,8 +146,6 @@ function judgmentTextMessage(context, event) {
     if (event.message.text.indexOf('天気') > -1) {
       openWeatherMap(context, event)
           .then((res) => {
-            context.log(res.weather[0].id);
-            context.log(WEATHER_ID[res.weather[0].id]);
             client.replyMessage(event.replyToken, [{
               type: MESSAGE_TYPE.text,
               text: '東京の天気は、' + WEATHER_ID[res.weather[0].id],
