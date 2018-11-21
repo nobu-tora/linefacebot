@@ -10,14 +10,14 @@
 
 ### 2枚目のスライド
 
-![image](app-configuration.png)
+![image](Pitch/app-configuration.png)
 
 +++
 
 
 ### 3枚目のスライド
 
-![image](image/app-configuration.png)
+![image](Pitch/image/app-configuration.png)
 
 ---
 
