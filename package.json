@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/s0raySoA/linefacebot/issues"
   },
-  "homepage": "https://github.com/s0raySoA/linefacebot#readme"
+  "homepage": "https://github.com/s0raySoA/linefacebot#readme",
+  "dependencies": {
+    "@line/bot-sdk": "^6.3.0"
+  }
 }
