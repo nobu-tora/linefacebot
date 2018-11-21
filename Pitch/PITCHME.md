@@ -4,7 +4,7 @@
 
 ### Botアプリケーション構造のイメージ
 
-![image](Pitch/image/app-configuration.png)
+![app-configuration](Pitch/image/app-configuration.png)
 
 ---
 
@@ -20,7 +20,3 @@
 
 
 ### 4枚目のスライド
-
-```?code=QueueTriggerJS1/index.js
-
-```
