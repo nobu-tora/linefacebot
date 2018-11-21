@@ -10,7 +10,7 @@
 
 ### 2枚目のスライド
 
-![](./app-configuration.png)
+![image](./app-configuration.png)
 +++
 
 
