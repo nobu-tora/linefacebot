@@ -4,7 +4,7 @@
 
 ### Botアプリケーション構造のイメージ
 
-![image](./Pitch/image/app-configuration.png)
+![image](Pitch/image/app-configuration.png)
 
 ---
 
