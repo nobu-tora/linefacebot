@@ -2,7 +2,7 @@
 
 こんな感じ
 
-![](faceBot-test.jpg "width=300px")
+![](image/faceBot-test.jpg "width=300px")
 
 ## ハンズオン
 
