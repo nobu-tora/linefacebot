@@ -4,20 +4,17 @@
 
 ### Botアプリケーション構造のイメージ
 
+![image](./Pitch/image/app-configuration.png)
 
 ---
 
 
 ### 2枚目のスライド
 
-![image](Pitch/app-configuration.png)
-
 +++
 
 
 ### 3枚目のスライド
-
-![image](Pitch/image/app-configuration.png)
 
 ---
 
