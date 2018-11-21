@@ -1,25 +1,22 @@
 ### ハンズオン資料　テストスライド
 
-### 1枚目のスライド
+---
 
+### Botアプリケーション構造のイメージ
+
+![app-configuration](image/app-configuration.png)
 
 ---
 
 
 ### 2枚目のスライド
 
-
 +++
 
 
 ### 3枚目のスライド
 
-
 ---
 
 
 ### 4枚目のスライド
-
-```?code=QueueTriggerJS1/index.js
-
-```
