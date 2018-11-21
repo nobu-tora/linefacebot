@@ -10,13 +10,13 @@
 
 ### 2枚目のスライド
 
-![](system.png)
+![](./app-configuration.png)
 +++
 
 
 ### 3枚目のスライド
 
-![](image/system.png)
+![](./image/app-configuration.png)
 ---
 
 
