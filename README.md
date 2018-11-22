@@ -6,4 +6,4 @@
 
 ## ハンズオン
 
-[スライド](https://gitpitch.com/s0raySoA/linefacebot/master)
+[スライド](procedureManual.md)
