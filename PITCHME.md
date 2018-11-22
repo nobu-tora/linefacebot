@@ -13,14 +13,14 @@
 
 ### 手順
 
-1. LINE DevelopersでChannelの作成
+1. LINE Developersでチャネルの作成
 2. Microsoft AzureでFace APIの作成
 3. Microsoft AzureでFunctionの作成
 4. 動作確認
 
 ---
 
-### 1. LINE DevelopersでChannelの作成
+### 1. LINE Developersでチャネルの作成
 
 ---
 
@@ -50,10 +50,12 @@ Time: 3m
 
 ---
 
-### チャンネルの作成
+### チャネルの作成
 
-1. 作成したプロバイダーを選択後、`新規チャンネル作成`を選択
-2. チャンネルを選択
+Time: 8m
+
+1. 作成したプロバイダーを選択後、`新規チャネル作成`を選択
+2. チャネルを選択
     + 今回は、Azureを使用しBotを作成する為、`Messaging API`を選択
 ![create-channel](image/create-channel.png)
 3. Messaging APIの情報を入力
@@ -65,7 +67,7 @@ Time: 3m
     + アプリ説明
         + 500文字以内
     + 料金プランの選択
-        + 初期選択プラン(Developer Trial or フリー)はどちらも無料で利用できます。どちらでも今回は可能ですが、個人用なので`Developer Trial`を選択する
+        + 初期選択プラン(Developer Trial or フリー)はどちらも無料で利用可能。どちらでも今回は可能ですが、個人用なので`Developer Trial`を選択する
         ![select-plan](image/select-plan.png)
     + 大業種と小業種を指定
         + 今回は個人用なので、大業種は`個人`を選択
@@ -73,7 +75,29 @@ Time: 3m
         + 重要なお知らせと、最新ニュースが届きます
 4. 内容の入力が完了後、`入力内容を確認する`を選択
 5. 確認画面で変更がなければ`作成`を選択
+
 ---
 
+### チャネルの設定
 
-### 4枚目のスライド
+チャネルの設定を行う
+
+1. 作成したチャネルに移動する
+2. `チャネル基本設定`に移動する
+![select-plan](image/channel-settings1.png)
+3. `Channel Secret`(秘密鍵)を、後ほど使用するので、メモしておく
+![select-plan](image/channel-settings3.png)
+4. `アクセストークン`を発行し、後ほど使用するので、メモしておく
+5. `Webhook送信`を`利用する`に指定する
+6. `Webhook URL`は、後ほど、Azure Function作成後、指定する
+![select-plan](image/channel-settings2.png)
+7. `利用可能な機能`に`REPLY_MESSAGE`を追加する
+![select-plan](image/channel-settings4.png)
+8. `自動応答メッセージ`を`利用しない`に指定する
+![select-plan](image/channel-settings5.png)
+
+### チャネルの完成
+
+ここまででLINE Developersでチャネルの作成は、終了です
+
+![select-plan](image/bot-chan.png)
