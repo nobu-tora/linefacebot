@@ -1,44 +1,50 @@
-### ハンズオン資料
+# ハンズオン資料
 
 + ぼっとちゃんを作成する為の手順
     + 個人用のボット作成手順です
 
----
-
-### Botアプリケーション構造のイメージ
+## Botアプリケーション構造のイメージ
 
 ![app-configuration](image/app-configuration.png)
 
 ---
 
-### 手順
+## 手順
 
-1. LINE Developersでチャネルの作成
+1. LINE Developersでチャネルの作成 (30分)
 2. Microsoft AzureでFace APIの作成
 3. Microsoft AzureでFunctionの作成
 4. 動作確認
 
 ---
 
-### 1. LINE Developersでチャネルの作成
+## LINE Developersでチャネルの作成(30分)
+
+チャネルの作成を行う。
+
+1. LINE Developersにログイン
+2. プロバイダーの作成
+3. チャネルの作成
+4. チャネルの設定
+5. チャネルの完成
 
 ---
 
 ### LINE Developersにログイン
 
-Time: 3m
+Time: 5m
 
 1. [LINE developers](https://developers.line.biz/ja/)から、ログインページに移動
 2. `LINEでログイン`を選択
     * LINE Business ID
         * 今回は個人用の為、私用のLINEアカウントで行います
-![LINE-login](image/LINE-login.png)
+![LINE-login](image/LINE-login.png "width=300px")
 
 ---
 
 ### プロバイダーの作成
 
-Time: 3m
+Time: 5m
 
 + プロバイダー
     + サービス提供者（企業・個人）の名前です
@@ -52,7 +58,7 @@ Time: 3m
 
 ### チャネルの作成
 
-Time: 8m
+Time: 10m
 
 1. 作成したプロバイダーを選択後、`新規チャネル作成`を選択
 2. チャネルを選択
@@ -80,6 +86,8 @@ Time: 8m
 
 ### チャネルの設定
 
+Time: 10m
+
 チャネルの設定を行う
 
 1. 作成したチャネルに移動する
@@ -96,8 +104,15 @@ Time: 8m
 8. `自動応答メッセージ`を`利用しない`に指定する
 ![select-plan](image/channel-settings5.png)
 
+---
+
 ### チャネルの完成
 
 ここまででLINE Developersでチャネルの作成は、終了です
 
-![select-plan](image/bot-chan.png)
+![select-plan](image/bot-chan.png "width=300px")
+
+---
+
+## Microsoft AzureでFace APIの作成
+
