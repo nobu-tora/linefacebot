@@ -1,7 +1,15 @@
 # ハンズオン資料
 
-+ ぼっとちゃんを作成する為の手順
-    + 個人用のボット作成手順です
+ぼっとちゃんを作成する為の手順
+
+個人用のボット作成手順です
+
++ レベル
+    + Gitの基本的な操作
++ 必要なもの
+    + LINEアカウント
+    + LINEのアプリケーション
+    + Azure アカウント(お金がかかっても大丈夫なアカウント)
 
 ## Botアプリケーション構造のイメージ
 
@@ -12,9 +20,10 @@
 ## 手順
 
 1. LINE Developersでチャネルの作成 (30分)
-2. Microsoft AzureでFace APIの作成
-3. Microsoft AzureでFunctionの作成
-4. 動作確認
+2. Microsoft Azureでリソースグループの作成(15分)
+3. Microsoft AzureでFace APIの作成(分)
+4. Microsoft AzureでFunctionの作成(分)
+5. 動作確認(分)
 
 ---
 
@@ -38,7 +47,7 @@ Time: 5m
 2. `LINEでログイン`を選択
     * LINE Business ID
         * 今回は個人用の為、私用のLINEアカウントで行います
-![LINE-login](image/LINE-login.png "width=100px")
+![LINE-login](image/LINE-login.png)
 
 ---
 
@@ -110,9 +119,35 @@ Time: 10m
 
 ここまででLINE Developersでチャネルの作成は、終了です
 
-![select-plan](image/bot-chan.png "width=100px")
+![select-plan](image/bot-chan.png)
 
 ---
 
-## Microsoft AzureでFace APIの作成
+## Microsoft Azureでリソースグループの作成
 
+サービス作成する時に、リソースグループも一緒に作成できますが、
+今回は先に`空のリソースグループ`を作成します。
+
+
+
+## Microsoft AzureでFace APIの作成(15分)
+
+Time: 15m
+
+1. [Azure portal](https://portal.azure.com/)で、ログインする
+2. 左上の`リソースの作成`を選択
+3. 検索欄に`リソースグループ`を入力し検索する
+4. 検索条件で表示された`リソースグループ`を選択
+![azure-portal-resource-group](image/azure-portal-resource-group.png)
+5. 作成を選択
+6. リソースグループを作成する
+    + リソースグループ名
+    + サブスクリプション
+        + 使用するサブスクリプションを選択
+    + リソースの場所
+        + 適切なデータセンターを指定
+![resource-group](image/resource-group.png)
+5. 作成を選択
+6. [リソースグループ ○○○ が正常に作成されました] という通知が表示されればOK
+
+## Microsoft AzureでFace APIの作成(分)
