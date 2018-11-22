@@ -38,7 +38,7 @@ Time: 5m
 2. `LINEでログイン`を選択
     * LINE Business ID
         * 今回は個人用の為、私用のLINEアカウントで行います
-![LINE-login](image/LINE-login.png "width=300px")
+![LINE-login](image/LINE-login.png "width=100px")
 
 ---
 
@@ -110,7 +110,7 @@ Time: 10m
 
 ここまででLINE Developersでチャネルの作成は、終了です
 
-![select-plan](image/bot-chan.png "width=300px")
+![select-plan](image/bot-chan.png "width=100px")
 
 ---
 
