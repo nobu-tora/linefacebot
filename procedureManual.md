@@ -229,7 +229,7 @@ Time: 10m
 6. 開発タブを選択し、以下のコードに置き換える
 
 + function.json
-Azure Queue Storageへのバインド設定を追加する
+    + Azure Queue Storageへのバインド設定を追加
 
 ```json
 {
@@ -258,7 +258,7 @@ Azure Queue Storageへのバインド設定を追加する
 ```
 
 + index.js
-LINEからHTTP送信されたBodyをAzure Queue Storageに設定する処理
+    + LINEからHTTP送信されたBodyをAzure Queue Storageに設定する
 
 ```js
 module.exports = function (context, req) {
@@ -311,7 +311,7 @@ module.exports = function (context, req) {
 ```
 
 + index.js
-Azure Queue Storageに設定された内容を取得し、画像ならFaceAPIに渡し、年齢をLINEに送信する
+    + Azure Queue Storageに設定された内容を取得し、画像ならFaceAPIに渡し、年齢をLINEに送信する
 
 ```js
 const https = require('https');
@@ -483,3 +483,9 @@ function getImageData(context, event) {
 
 ![Webhook](image/webhook.png)
 
+## 顔が映った画像を送信してみる
+
+年齢が返ってくれば成功
+以下は、フリー画像を使わせて頂いています
+
+![](image/faceBot-test.jpg)
