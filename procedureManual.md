@@ -483,7 +483,7 @@ function getImageData(context, event) {
 
 ## 顔が映った画像を送信してみる
 
-年齢が返ってくれば成功
-以下は、フリー画像を使わせて頂いています
++ 年齢が返ってくれば成功
+    + 以下は、フリー画像を使わせて頂いています
 
 ![](image/faceBot-test.jpg)
