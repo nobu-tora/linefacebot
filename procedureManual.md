@@ -1,32 +1,30 @@
 # 顔年齢判断BOTを作成する為の手順
 
-個人用のボット作成手順です
+個人用のボット作成手順です。
+ハンズオン用作成している為、事前準備などが記載されております。
 
 + 事前準備
-    + 主催者が準備するもの
+    + 主催者が準備、セットアップしておくもの
         + PC
             + 推奨OS: Windows10以降、macOS,Ubuntu
             + 推奨エディタ
                 + Visual Studio Code
                     + 拡張子 : `Extensions for VS Code`
+            + Bash on Windows(Windowsの場合)
             + LINE アプリケーション
             + Node
-                + Version: 6.5.0 (v8.3.0)
-            + azure cli
+                + Version: 6.5.0
             + LINEアカウント
             + Azure アカウント(お金がかかっても大丈夫なアカウント)
 + レベル/事前予習
-    + 基本的なターミナル操作
+    + AzureのGUI操作ができる
+    + 基本的なターミナル操作ができる
 
 ## Botアプリケーション構造のイメージ
 
 ![app-configuration](image/app-configuration.png)
 
 ---
-
-## 準備
-
-+ メモを途中で行うので、Visual Studio Code等のエディターを事前に開いておいてく
 
 ## 手順
 
@@ -39,6 +37,12 @@
 7. アプリケーション設定で環境変数を指定(5分)
 8. LINE DevelopersのチャネルからAzure FunctionにKickする(5分)
 9. 顔が映った画像を送信してみる(5分)
+
+---
+
+## 準備
+
++ メモを途中で行うので、Visual Studio Code等のエディターを事前に開いておいてく
 
 ---
 
@@ -216,7 +220,7 @@ Time: 10m
     + ホスティング プラン
         + `従量課金プラン`を指定する
         + 今回は、個人用で月100万回は超えない想定の為、主に価格で従量課金プランを選んだ
-        + Functionのホスティングプランについて、最後の[option](##option)で書いてありますので参考にしてください
+        + Functionのホスティングプランについて、最後にoptionで書いてありますので参考にしてください
     + 場所
         + `東日本`(適切なデータセンターを指定)を指定する
     + ランタイムストック
@@ -344,7 +348,7 @@ module.exports = function (context, req) {
 
 #### LINEから送られてくる内容の例
 
-```json
+```
 {
     type: 'message',
     replyToken: '00000000000000',
@@ -440,7 +444,7 @@ module.exports = function (context, req) {
             + Dv2 シリーズ計算と同等
             + 66662.40 JPY/月 (推定)
 
-## 選び方
+#### 選び方
 
 基本的には、従量課金でよいと思います。
 既に他のApp Serviceインスタンスを実行している場合や、従量課金ではスペック(CPU、メモリ、実行時間など)が足りない場合、また、常に起動していて欲しい場合などはApp Serviceプランも候補として上がります。
