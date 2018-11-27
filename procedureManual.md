@@ -313,7 +313,7 @@ module.exports = function (context, req) {
 
 ```js
 /* QueueTriggerJS1/index.js を参照してください
-変数`COGNITIVE_SERVICE`で指定しているCognitive Serviceがリージョン違う為、変更してください
+変数`COGNITIVE_SERVICE`で指定しているCognitive Serviceがリージョンが違う為、変更してください
 また、他に変更箇所があれば、各自で変更してください
 */
 ```
