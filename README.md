@@ -6,4 +6,4 @@
 
 ## ハンズオン
 
-[スライド](procedureManual.md)
+[手順書](procedureManual.md)
