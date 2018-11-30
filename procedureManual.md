@@ -9,13 +9,10 @@
             + 推奨OS: Windows10以降、macOS,Ubuntu
             + 推奨エディタ
                 + Visual Studio Code
-                    + 拡張子 : `Extensions for VS Code`
             + Bash on Windows(Windowsの場合)
             + LINE アプリケーション
-            + Node
-                + Version: 6.5.0
             + LINEアカウント
-            + Azure アカウント(お金がかかっても大丈夫なアカウント)
+            + Azure アカウント
 + レベル/事前予習
     + AzureのGUI操作ができる
     + 基本的なターミナル操作ができる
