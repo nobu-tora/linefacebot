@@ -270,7 +270,7 @@ Time: 10m
       "type": "queue",
       "name": "outputQueueItem",
       "queueName": "js-queue-items",
-      "connection": "AzureWebJobsDashboard",
+      "connection": "AzureWebJobsStorage",
       "direction": "out"
     }
   ],
@@ -324,7 +324,7 @@ module.exports = function (context, req) {
       "type": "queueTrigger",
       "direction": "in",
       "queueName": "js-queue-items",
-      "connection": "AzureWebJobsDashboard"
+      "connection": "AzureWebJobsStorage"
     }
   ],
   "disabled": false
