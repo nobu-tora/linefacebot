@@ -343,6 +343,20 @@ module.exports = function (context, req) {
 
 [index](QueueTriggerJS1/index.js)
 
+
+7. 外部パッケージ(LINE SDK)を使用する
+
+index.jsでLINE SDKを使用している為、インストールする
+作成したFunctionの`プラットフォーム機能` → `コンソール`を選択する
+
+![root-tarminal](image/root-tarminal.png)
+
+以下を実行
+
+```shell
+$ npm install @line/bot-sdk --save
+```
+
 #### LINEから送られてくる内容の例
 
 ```
