@@ -1,12 +1,9 @@
 const https = require('https');
-var http = require('http');
 const url = require('url');
 const Client = require('@line/bot-sdk').Client;
 
 /* message */
 const MSG_400_1 = '画像をおくってね。\n顔年齢を診断できるよ！';
-// const MSG_400_2 = 'このスタンプいいと思うよ！！';
-// const MSG_400_3 = 'おやすみなさい';
 const MSG_400_4 = 'ほんとに顔写ってる画像ですか？';
 const MSG_500 = '・・・エラーが発生しました。';
 
@@ -22,8 +19,11 @@ const MESSAGE_TYPE = {
   sticker: 'sticker',
 };
 
+// Cognitive Service Region
+const COGNITIVE_SERVICE_REGION = process.env.COGNITIVE_SERVICE_REGION;
+
 /* url */
-const COGNITIVE_SERVICE = 'https://australiaeast.api.cognitive.microsoft.com/'; // australiaeast
+const COGNITIVE_SERVICE = 'https://' + COGNITIVE_SERVICE_REGION + '.api.cognitive.microsoft.com/';
 
 /* LINE setting */
 const client = new Client({
