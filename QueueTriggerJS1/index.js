@@ -38,9 +38,15 @@ const client = new Client({
  * @param {*} myQueueItem
  */
 module.exports = function(context, myQueueItem) {
-  myQueueItem.events.forEach((event) => postMessage(context, event));
-  context.log('done');
-  context.done();
+  var promises = [];
+  myQueueItem.events.forEach((event) => {
+    promises.push(postMessage(context, event));
+  });
+  Promise.all(promises)
+    .then(() => {
+      context.log('done');
+      context.done();
+    });
 };
 
 /**
@@ -50,25 +56,42 @@ module.exports = function(context, myQueueItem) {
  * @param {*} event
  */
 function postMessage(context, event) {
-  try {
-    context.log(event);
-    const type = event.message.type;
-    if (type === MESSAGE_TYPE.image) {
-      getImageData(context, event)
-          .then((postData) => postCognitiveImage(context, event, postData));
-    } else {
+  return new Promise((resolve, reject) => {
+    try {
+      context.log(event);
+      const type = event.message.type;
+      if (type === MESSAGE_TYPE.image) {
+        getImageData(context, event)
+            .then((postData) => postCognitiveImage(context, event, postData))
+            .then((faceData) => {
+              var isExistFace = faceData.length !== 0 ? true : false;
+              if (isExistFace) {
+                successReplyMessage(context, event, faceData);
+              } else {
+                client.replyMessage(event.replyToken, {
+                  type: MESSAGE_TYPE.text,
+                  text: MSG_400_4,
+                });
+              };
+            })
+            .then(()=> resolve());
+      } else {
+        context.log('[log] No image');
+        client.replyMessage(event.replyToken, {
+          type: MESSAGE_TYPE.text,
+          text: MSG_400_1,
+        })
+        .then(()=> resolve());
+      }
+    } catch (err) {
+      context.log(err);
       client.replyMessage(event.replyToken, {
         type: MESSAGE_TYPE.text,
-        text: MSG_400_1,
-      });
-    }
-  } catch (err) {
-    context.log(err);
-    client.replyMessage(event.replyToken, {
-      type: MESSAGE_TYPE.text,
-      text: MSG_500,
-    });
-  };
+        text: MSG_500,
+      })
+      .then(()=> resolve());
+    };
+  });
 };
 
 /**
@@ -79,6 +102,7 @@ function postMessage(context, event) {
  */
 function getImageData(context, event) {
   return new Promise((resolve, reject) => {
+    context.log('[log] Start getImageData');
     var data = [];
     client.getMessageContent(event.message.id)
         .then((stream) => {
@@ -90,10 +114,14 @@ function getImageData(context, event) {
             reject(err);
           });
           stream.on('end', () => {
+            context.log('[log] Success getImageData');
             resolve(Buffer.concat(data));
           });
         })
-        .catch((err) => reject(err));
+        .catch((err) => {
+          context.log('[err] postCognitiveImage');
+          reject(err);
+        });
   });
 };
 
@@ -105,47 +133,74 @@ function getImageData(context, event) {
  * @param {*} postData
  */
 function postCognitiveImage(context, event, postData) {
-  var parseUrl = url.parse(COGNITIVE_SERVICE + 'face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile');
-  var postOptions = {
-    host: parseUrl.host,
-    path: parseUrl.path,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/octet-stream',
-      'Content-Length': postData.length,
-      'Ocp-Apim-Subscription-Key': process.env.COGNITIVE_KEY,
-    },
-  };
+  return new Promise((resolve, reject) => {
+    try {
+      context.log('[log] Start postCognitiveImage');
+      var parseUrl = url.parse(COGNITIVE_SERVICE + 'face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender,smile');
+      var postOptions = {
+        host: parseUrl.host,
+        path: parseUrl.path,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Content-Length': postData.length,
+          'Ocp-Apim-Subscription-Key': process.env.COGNITIVE_KEY,
+        },
+      };
 
-  var bodyString = null;
-  var req = https.request(postOptions, function(res) {
-    res.setEncoding('utf8');
-    res.on('data', function(chunk) {
-      bodyString = chunk;
-    });
-    res.on('end', function() {
-      if (res.statusCode !== 200 || bodyString === '[]') {
-        return client.replyMessage(event.replyToken, {
-          type: MESSAGE_TYPE.text,
-          text: MSG_400_4,
+      var bodyString = null;
+      var req = https.request(postOptions, function(res) {
+        res.setEncoding('utf8');
+        res.on('data', function(chunk) {
+          bodyString = chunk;
         });
-      } else {
-        var result = JSON.parse(bodyString);
-        var age = result[0].faceAttributes.age;
-        var gender = '人間';
-
-        if (result[0].faceAttributes.gender === 'male') {
-          gender = ENUM_GENDER.male;
-        } else if (result[0].faceAttributes.gender === 'female') {
-          gender = ENUM_GENDER.female;
-        };
-        return client.replyMessage(event.replyToken, {
-          type: MESSAGE_TYPE.text,
-          text: 'う～ん、、、\n' + age + '歳の' + gender + 'かな？',
+        res.on('end', function() {
+          if (res.statusCode !== 200 || bodyString === '[]') {
+            context.log('[log] No face');
+            resolve([]);
+          } else {
+            context.log('[log] Success postCognitiveImage');
+            resolve(bodyString);
+          };
         });
-      }
-    });
+      });
+      req.write(postData);
+      req.end();
+    } catch (err) {
+      context.log('[err] postCognitiveImage');
+      reject(err);
+    };
   });
-  req.write(postData);
-  req.end();
+};
+
+/**
+ * success
+ *
+ * @param {*} context
+ * @param {*} event
+ * @param {*} faceData
+ */
+function successReplyMessage(context, event, faceData) {
+  return new Promise((resolve, reject) => {
+    try {
+      var face = JSON.parse(faceData)[0];
+      var age = face.faceAttributes.age;
+      var gender = '人間';
+
+      if (face.faceAttributes.gender === 'male') {
+        gender = ENUM_GENDER.male;
+      } else if (face.faceAttributes.gender === 'female') {
+        gender = ENUM_GENDER.female;
+      };
+
+      client.replyMessage(event.replyToken, {
+        type: MESSAGE_TYPE.text,
+        text: 'う～ん、、、\n' + age + '歳の' + gender + 'かな？',
+      })
+      .then(() => resolve());
+    } catch (err) {
+      context.log('[err] successReplyMessage');
+      reject(err);
+    };
+  });
 };
