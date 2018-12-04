@@ -337,10 +337,7 @@ module.exports = function (context, req) {
     + Azure Queue Storageに設定された内容を取得し、画像であるなら、LINEから画像データを取得する。画像データをFaceAPIに渡し、返ってきた年齢情報をLINEに送信する
 
 ```js
-/* QueueTriggerJS1/index.js を参照してください
-変数`COGNITIVE_SERVICE`で指定しているCognitive Serviceがリージョンが違う為、変更してください
-また、他に変更箇所があれば、各自で変更してください
-*/
+/* QueueTriggerJS1/index.js を参照してください */
 ```
 
 [index](QueueTriggerJS1/index.js)
@@ -353,7 +350,7 @@ index.jsでLINE SDKを使用している為、インストールする
 
 ![root-tarminal](image/root-tarminal.png)
 
-以下を実行
+`QueueTriggerJS1`の下で以下を実行
 
 ```shell
 $ npm install @line/bot-sdk --save
