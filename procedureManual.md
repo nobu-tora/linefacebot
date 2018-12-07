@@ -248,37 +248,17 @@ Time: 10m
         + `Function`
 ![azure-function](image/create-httptrigger.png)
 5. 作成した`HttpTriggerJS1`を選択する
-6. 開発タブを選択し、以下のコードに置き換える
+6. LINEから送られてきた内容を`Azure Queue Storage`に保存する為、バインド設定を追加
 
-+ function.json
-    + 関数のバインド設定
-        + LINEから送られてきた内容を`Azure Queue Storage`に保存する為、バインド設定を追加
+![ttp-trigger](image/http-trigger.png)
 
-```json
-{
-  "bindings": [
-    {
-      "authLevel": "function",
-      "type": "httpTrigger",
-      "direction": "in",
-      "name": "req"
-    },
-    {
-      "type": "http",
-      "direction": "out",
-      "name": "$return"
-    },
-    {
-      "type": "queue",
-      "name": "outputQueueItem",
-      "queueName": "js-queue-items",
-      "connection": "AzureWebJobsStorage",
-      "direction": "out"
-    }
-  ],
-  "disabled": false
-}
-```
+Azure Queue Storageを選択
+![select-trigger](image/select-trigger.png)
+
+`キュー名`、`ストレージアカウント接続名`をメモし、保存を選択
+![qt](image/qt.png)
+
+7. 開発タブを選択し、以下のコードに置き換える
 
 + index.js
     + LINEからHTTP送信されたBodyをAzure Queue Storageに設定する
@@ -290,8 +270,8 @@ module.exports = function (context, req) {
 };
 ```
 
-7. 上の方にある`関数のURLの取得`を選択する
-8. 表示されたURLをメモしておく(※他人に知られないlocal環境のエディタでメモしてください)
+8. 上の方にある`関数のURLの取得`を選択する
+9. 表示されたURLをメモしておく(※他人に知られないlocal環境のエディタでメモしてください)
 
 ![function-url](image/function-url.png)
 
@@ -314,24 +294,6 @@ module.exports = function (context, req) {
 ![create-queue](image/create-queue.png)
 5. 作成した`QueueTriggerJS1`を選択する
 6. 開発タブに移動し、以下のコードに置き換える
-
-+ function.json
-    + 関数のバインド設定
-
-```
-{
-  "bindings": [
-    {
-      "name": "myQueueItem",
-      "type": "queueTrigger",
-      "direction": "in",
-      "queueName": "js-queue-items",
-      "connection": "AzureWebJobsStorage"
-    }
-  ],
-  "disabled": false
-}
-```
 
 + index.js
     + Azure Queue Storageに設定された内容を取得し、画像であるなら、LINEから画像データを取得する。画像データをFaceAPIに渡し、返ってきた年齢情報をLINEに送信する
