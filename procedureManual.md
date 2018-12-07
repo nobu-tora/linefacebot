@@ -6,19 +6,18 @@
 + 事前準備
     + 主催者が準備、セットアップしておくもの
         + PC
-            + 推奨OS: Windows10以降、macOS,Ubuntu
-            + 推奨エディタ
-                + Visual Studio Code
-                    + 拡張子 : `Extensions for VS Code`
-            + Bash on Windows(Windowsの場合)
-            + LINE アプリケーション
-            + Node
-                + Version: 6.5.0
-            + LINEアカウント
-            + Azure アカウント(お金がかかっても大丈夫なアカウント)
+            + 本ハンズオンではAzure上での作業にしたので、指定はございません
+        + エディタ
+            + メモ程度なので特に指定はございません
+        + LINE アプリケーション
+            + スマホ/PC　どちらでも可
+        + LINEアカウント
+        + Azure アカウント
 + レベル/事前予習
-    + AzureのGUI操作ができる
-    + 基本的なターミナル操作ができる
+    + HTTPを触ったことがある
+    + サーバレスアーキテクチャを触ったことがある
+    + Azureサービスを触ったことがある
+    + Linuxターミナルを触ったことがある
 
 ## Botアプリケーション構造のイメージ
 
@@ -157,12 +156,12 @@ Time: 10m
 5. 作成を選択
 6. リソースグループを作成する
     + リソースグループ名
-        + ユニークなので指定はないが、分かりやすい名前にする
+        + `test-bot-group`
     + サブスクリプション
         + 使用するサブスクリプション
         を選択
     + リソースの場所
-        + `東日本`(適切なデータセンターを指定)
+        + `東南アジア`(適切なデータセンターを指定)
 ![resource-group](image/resource-group.png)
 7. 作成を選択
 8. [リソースグループ ○○○ が正常に作成されました] という通知が表示されればOK
@@ -179,12 +178,12 @@ Time: 10m
 5. 作成を選択
 6. cognitive services Face APIを作成する
     + Name
-        + ユニークなので指定はないが、分かりやすい名前にする
+        + `test-bot-face`
     + サブスクリプション
         + 使用するサブスクリプション
         を選択
     + 場所
-        + `東日本`(適切なデータセンターを指定)
+        + `東南アジア`(適切なデータセンターを指定)
     + 価格レベル
         + 無料枠の`F0`を選択
     + Resource group
@@ -209,7 +208,7 @@ Time: 10m
 5. 作成を選択
 6. cognitive services Face APIを作成する
     + アプリ名
-        + ユニークなので指定はないが、分かりやすい名前にする
+        + `test-bot`(ユニーク指定なので被らないように変更してください)
     + サブスクリプション
         + 使用するサブスクリプション
         を選択
@@ -222,7 +221,7 @@ Time: 10m
         + 今回は、個人用で月100万回は超えない想定の為、主に価格で従量課金プランを選んだ
         + Functionのホスティングプランについて、最後にoptionで書いてありますので参考にしてください
     + 場所
-        + `東日本`(適切なデータセンターを指定)を指定する
+        + `東南アジア`(適切なデータセンターを指定)を指定する
     + ランタイムストック
         + `JavaScript`を指定する
     + Storage
@@ -249,37 +248,17 @@ Time: 10m
         + `Function`
 ![azure-function](image/create-httptrigger.png)
 5. 作成した`HttpTriggerJS1`を選択する
-6. 開発タブを選択し、以下のコードに置き換える
+6. LINEから送られてきた内容を`Azure Queue Storage`に保存する為、バインド設定を追加
 
-+ function.json
-    + 関数のバインド設定
-        + LINEから送られてきた内容を`Azure Queue Storage`に保存する為、バインド設定を追加
+![ttp-trigger](image/http-trigger.png)
 
-```json
-{
-  "bindings": [
-    {
-      "authLevel": "function",
-      "type": "httpTrigger",
-      "direction": "in",
-      "name": "req"
-    },
-    {
-      "type": "http",
-      "direction": "out",
-      "name": "$return"
-    },
-    {
-      "type": "queue",
-      "name": "outputQueueItem",
-      "queueName": "js-queue-items",
-      "connection": "AzureWebJobsDashboard",
-      "direction": "out"
-    }
-  ],
-  "disabled": false
-}
-```
+Azure Queue Storageを選択
+![select-trigger](image/select-trigger.png)
+
+`キュー名`、`ストレージアカウント接続名`をメモし、保存を選択
+![qt](image/qt.png)
+
+7. 開発タブを選択し、以下のコードに置き換える
 
 + index.js
     + LINEからHTTP送信されたBodyをAzure Queue Storageに設定する
@@ -291,8 +270,8 @@ module.exports = function (context, req) {
 };
 ```
 
-7. 上の方にある`関数のURLの取得`を選択する
-8. 表示されたURLをメモしておく(※他人に知られないlocal環境のエディタでメモしてください)
+8. 上の方にある`関数のURLの取得`を選択する
+9. 表示されたURLをメモしておく(※他人に知られないlocal環境のエディタでメモしてください)
 
 ![function-url](image/function-url.png)
 
@@ -316,35 +295,28 @@ module.exports = function (context, req) {
 5. 作成した`QueueTriggerJS1`を選択する
 6. 開発タブに移動し、以下のコードに置き換える
 
-+ function.json
-    + 関数のバインド設定
-
-```
-{
-  "bindings": [
-    {
-      "name": "myQueueItem",
-      "type": "queueTrigger",
-      "direction": "in",
-      "queueName": "js-queue-items",
-      "connection": "AzureWebJobsDashboard"
-    }
-  ],
-  "disabled": false
-}
-```
-
 + index.js
     + Azure Queue Storageに設定された内容を取得し、画像であるなら、LINEから画像データを取得する。画像データをFaceAPIに渡し、返ってきた年齢情報をLINEに送信する
 
 ```js
-/* QueueTriggerJS1/index.js を参照してください
-変数`COGNITIVE_SERVICE`で指定しているCognitive Serviceがリージョンが違う為、変更してください
-また、他に変更箇所があれば、各自で変更してください
-*/
+/* QueueTriggerJS1/index.js を参照してください */
 ```
 
 [index](QueueTriggerJS1/index.js)
+
+
+7. 外部パッケージ(LINE SDK)を使用する
+
+index.jsでLINE SDKを使用している為、インストールする
+作成したFunctionの`プラットフォーム機能` → `コンソール`を選択する
+
+![root-tarminal](image/root-tarminal.png)
+
+`QueueTriggerJS1`の下で以下を実行
+
+```shell
+$ npm install @line/bot-sdk --save
+```
 
 #### LINEから送られてくる内容の例
 
@@ -385,6 +357,7 @@ module.exports = function (context, req) {
 | アプリ設定名 | 値 | 使用用途 |
 | --- | --- | --- |
 | COGNITIVE_KEY | FaceAPI作成時、メモしたKEY | 作成したFace APIに画像データを送る際の識別に使われる |
+| COGNITIVE_SERVICE_REGION | [overview](https://azure.microsoft.com/ja-jp/global-infrastructure/regions/)で調べる | Face APIの作成したリージョンを指定する(東南アジア:southeastasia) |
 | LINE_CHANNEL_ACCESS_TOKEN | チャネル作成時、メモしたアクセストークン | 作成したLINEのチャネルを特定しCallする為に使われる |
 | LINE_CHANNEL_SECRET | チャネル作成時、メモしたシークレットキー |  作成したLINEのチャネルを特定しCallする為に使われる |
 
