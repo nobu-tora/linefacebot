@@ -82,7 +82,7 @@ function postMessage(context, event) {
           text: MSG_400_1,
         })
         .then(()=> resolve());
-      }
+      };
     } catch (err) {
       context.log(err);
       client.replyMessage(event.replyToken, {
